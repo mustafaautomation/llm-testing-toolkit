@@ -1,0 +1,49 @@
+{
+  "name": "llm-testing-toolkit",
+  "version": "1.0.0",
+  "description": "Provider-agnostic LLM testing framework with regression, hallucination, quality, and toxicity evaluators",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "llm-test": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "llm",
+    "testing",
+    "ai",
+    "evaluation",
+    "regression",
+    "hallucination",
+    "quality",
+    "toxicity",
+    "openai",
+    "anthropic"
+  ],
+  "author": "Muhammad Mustafa",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.7",
+    "string-similarity": "^4.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/string-similarity": "^4.0.2",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ]
+}
