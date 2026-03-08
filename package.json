@@ -1,0 +1,74 @@
+{
+  "name": "llm-testing-toolkit",
+  "version": "1.0.0",
+  "description": "Provider-agnostic LLM testing framework with regression, hallucination, quality, and toxicity evaluators",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "llm-test": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "keywords": [
+    "llm",
+    "testing",
+    "ai",
+    "evaluation",
+    "regression",
+    "hallucination",
+    "quality",
+    "toxicity",
+    "openai",
+    "anthropic",
+    "claude",
+    "gpt",
+    "ci-cd",
+    "test-automation"
+  ],
+  "author": "Quvantic <info@quvantic.com> (https://quvantic.com)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mustafaautomation/llm-testing-toolkit.git"
+  },
+  "homepage": "https://github.com/mustafaautomation/llm-testing-toolkit#readme",
+  "bugs": {
+    "url": "https://github.com/mustafaautomation/llm-testing-toolkit/issues"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist"
+  ]
+}
