@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+llm-test-results/
+baselines/
+test-results/
+.git/
+examples/
+tests/
