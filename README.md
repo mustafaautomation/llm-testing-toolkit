@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/mustafaautomation/llm-testing-toolkit/actions/workflows/llm-tests.yml/badge.svg)](https://github.com/mustafaautomation/llm-testing-toolkit/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-20+-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](Dockerfile)
 
@@ -273,7 +273,7 @@ const results = await runner.run();
 
 ## CI/CD Integration
 
-The included GitHub Actions workflow (`.github/workflows/llm-tests.yml`) runs on push and pull request to `main`, on Node 20:
+The included GitHub Actions workflow (`.github/workflows/llm-tests.yml`) runs on push and pull request to `main`, on Node 24:
 
 1. Lint, format check and type check
 2. Unit tests (no LLM calls, no API keys needed)
@@ -304,7 +304,7 @@ Machine-readable output for programmatic analysis and dashboards.
 ```
 llm-testing-toolkit/
 ├── .github/
-│   ├── workflows/llm-tests.yml    # CI pipeline (Node 20)
+│   ├── workflows/llm-tests.yml    # CI pipeline (Node 24)
 │   ├── dependabot.yml             # Automated dependency updates
 │   ├── CODEOWNERS                 # Review ownership
 │   └── pull_request_template.md   # PR checklist
