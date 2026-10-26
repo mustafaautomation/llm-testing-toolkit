@@ -52,7 +52,7 @@ export async function loadConfig(configPath?: string): Promise<ToolkitConfig> {
     }
 
     // For .ts/.js, use dynamic require (after compilation)
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const loaded = require(fullPath);
     const config = loaded.default || loaded;
     return { ...DEFAULT_CONFIG, ...config } as ToolkitConfig;
