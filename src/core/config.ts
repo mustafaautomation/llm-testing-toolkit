@@ -59,7 +59,7 @@ export async function loadConfig(configPath?: string): Promise<ToolkitConfig> {
   }
 
   throw new Error(
-    `No config file found. Create llm-tests.config.ts or run 'llm-test init' to generate one.`,
+    `No config file found. Create llm-tests.config.json (see examples/) or pass --config <path>.`,
   );
 }
 

@@ -2,11 +2,13 @@
 
 [![CI](https://github.com/mustafaautomation/llm-testing-toolkit/actions/workflows/llm-tests.yml/badge.svg)](https://github.com/mustafaautomation/llm-testing-toolkit/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](Dockerfile)
 
-A provider-agnostic LLM testing framework for evaluating AI model outputs with regression, hallucination, quality, and toxicity checks. Built with TypeScript, designed for CI/CD pipelines.
+A provider-agnostic TypeScript toolkit for checking LLM output with regression, hallucination, quality and toxicity/PII evaluators. It can run from a CLI in a CI pipeline or be used from code.
+
+The evaluators are heuristics computed locally (term-frequency cosine, Levenshtein and Dice similarity, regex-based PII checks, key-phrase overlap). They do not call a second model, so they are cheap and repeatable, but they measure wording overlap rather than meaning. Treat scores as signals that need a human look, not verdicts.
 
 ---
 
@@ -41,36 +43,35 @@ LLM outputs are non-deterministic. Traditional testing approaches don't work. Th
 ```
 $ npm test
 
- ✓ tests/unit/similarity.test.ts (21 tests) 4ms
- ✓ tests/unit/regression.test.ts (7 tests) 3ms
- ✓ tests/unit/hallucination.test.ts (4 tests) 3ms
- ✓ tests/unit/toxicity.test.ts (10 tests) 3ms
- ✓ tests/unit/quality.test.ts (11 tests) 3ms
-
- Test Files  5 passed (5)
-      Tests  53 passed (53)
-   Duration  339ms
+ Test Files  7 passed (7)
+      Tests  67 passed (67)
 ```
 
-> **53 unit tests** covering all 4 evaluators and similarity utilities. Tests run in under 400ms.
+> **67 unit tests** in 7 files (`tests/unit/`) covering the four evaluators, the similarity utilities, config loading and the suite types. The unit tests do not call any LLM API.
 
 ---
 
 ## Quick Start
 
+The package is not published to npm. Install it from source:
+
 ```bash
-# Install
-npm install llm-testing-toolkit
+git clone https://github.com/mustafaautomation/llm-testing-toolkit.git
+cd llm-testing-toolkit
+npm install
+npm test          # unit tests, no API key needed
+npm run build     # compiles to dist/
 
-# Initialize config
-npx llm-test init
-
-# Set API keys (see .env.example)
+# Set an API key (see .env.example)
 export OPENAI_API_KEY=sk-...
 
-# Run tests
-npx llm-test run
+# Run the example suites against a real model
+node dist/cli.js run --config examples/llm-tests.config.json
 ```
+
+Optionally run `npm link` to put the `llm-test` command on your PATH; the examples below use it.
+
+The CLI loads `.json` or `.js` config files. A `.ts` config (such as `examples/llm-tests.config.ts`) is only loaded if your Node.js setup can `require` TypeScript, so use JSON or compiled JS with the CLI.
 
 ---
 
@@ -131,7 +132,7 @@ const config: ToolkitConfig = {
 
 ### Regression Testing
 
-Compare LLM responses against saved baselines using semantic similarity.
+Compare an LLM response with the `baseline` string in the test case. `semantic` mode uses term-frequency cosine similarity (word overlap, not embeddings); `combined` adds key-phrase overlap.
 
 ```typescript
 {
@@ -149,9 +150,10 @@ Compare LLM responses against saved baselines using semantic similarity.
 }
 ```
 
-Update baselines automatically:
+To capture new baselines, run with `--update-baselines`. This writes the current responses to `baselines/baselines.json` (keyed by test name). The runner compares against each test's `baseline` field, so copy the values you accept back into your config.
+
 ```bash
-npx llm-test run --update-baselines
+llm-test run --config llm-tests.config.json --update-baselines
 ```
 
 ### Hallucination Detection
@@ -171,9 +173,10 @@ Verify responses stay grounded in source material.
 ```
 
 Evaluates:
-- Claim extraction from response
-- Per-claim grounding score against source documents
-- Contradiction detection
+
+- Splits the response into sentence-level claims
+- Scores each claim's word overlap with the supplied context
+- Flags simple contradictions (for example a negation of a context statement)
 
 ### Quality Evaluation
 
@@ -194,7 +197,7 @@ Multi-dimensional response quality scoring.
 }
 ```
 
-Scores: relevance, coherence, format compliance, completeness.
+Scores: relevance (word overlap with the prompt), coherence, format compliance (for JSON, parses it and checks the `required` keys) and completeness.
 
 ### Toxicity & Safety
 
@@ -215,34 +218,32 @@ Detect harmful content and PII leakage.
 }
 ```
 
-Detects: blocked terms, email addresses, phone numbers, SSNs, credit card numbers, IP addresses.
+Detects: built-in and custom blocked terms, and regex matches for email addresses, phone numbers, US SSNs, 16-digit card numbers and IPv4 addresses.
 
 ---
 
 ## CLI
 
-```bash
-# Run all test suites
-npx llm-test run
+`run` is the only command. Examples assume `npm link`; otherwise use `node dist/cli.js`.
 
-# Run specific suite
-npx llm-test run --suite regression
+```bash
+# Run all suites in a config file
+llm-test run --config llm-tests.config.json
+
+# Run one suite by name
+llm-test run --config llm-tests.config.json --suite regression
 
 # Multiple reporters
-npx llm-test run --reporter console,html,json
+llm-test run --config llm-tests.config.json --reporter console,html,json
 
-# Custom config path
-npx llm-test run --config ./my-config.ts
-
-# Update regression baselines
-npx llm-test run --update-baselines
+# Write current responses to baselines/baselines.json
+llm-test run --config llm-tests.config.json --update-baselines
 
 # Verbose output
-npx llm-test run -v
-
-# Initialize project
-npx llm-test init
+llm-test run --config llm-tests.config.json -v
 ```
+
+Without `--config`, the CLI looks for `llm-tests.config.ts`, `llm-tests.config.js` or `llm-tests.config.json` in the current directory.
 
 ---
 
@@ -254,7 +255,7 @@ import {
   HallucinationEvaluator,
   QualityEvaluator,
   ToxicityEvaluator,
-} from 'llm-testing-toolkit';
+} from 'llm-testing-toolkit'; // after `npm link llm-testing-toolkit`, or import from the built dist/
 
 // Use evaluators directly
 const regression = new RegressionEvaluator({ similarityThreshold: 0.8 });
@@ -263,7 +264,7 @@ console.log(result.passed, result.score);
 
 // Full test runner
 import { TestRunner, loadConfig } from 'llm-testing-toolkit';
-const config = await loadConfig();
+const config = await loadConfig('llm-tests.config.json');
 const runner = new TestRunner(config);
 const results = await runner.run();
 ```
@@ -272,27 +273,28 @@ const results = await runner.run();
 
 ## CI/CD Integration
 
-The included GitHub Actions workflow:
+The included GitHub Actions workflow (`.github/workflows/llm-tests.yml`) runs on push and pull request to `main`, on Node 20:
 
-1. Runs lint, format, type check on Node 18 & 20
-2. Executes unit tests with full validation
-3. Builds the package to verify publishability
+1. Lint, format check and type check
+2. Unit tests (no LLM calls, no API keys needed)
+3. A TypeScript build
 
-Add your API keys as repository secrets for LLM evaluation:
-- `OPENAI_API_KEY`
-- `ANTHROPIC_API_KEY`
+To evaluate a real model in your own pipeline, add `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` as secrets and add a step that runs `node dist/cli.js run --config <your-config>.json`. That step is not part of this repository's workflow.
 
 ---
 
 ## Reports
 
 ### Console
+
 Colorized terminal output with pass/fail indicators and score breakdowns.
 
 ### HTML
-Single-file visual report with expandable test details, scores, and prompt/response diffs. Dark theme, zero external dependencies.
+
+Single HTML file with a summary, expandable test details, scores, and the prompt and response for each test. Dark theme; no external assets.
 
 ### JSON
+
 Machine-readable output for programmatic analysis and dashboards.
 
 ---
@@ -302,7 +304,7 @@ Machine-readable output for programmatic analysis and dashboards.
 ```
 llm-testing-toolkit/
 ├── .github/
-│   ├── workflows/llm-tests.yml    # CI pipeline (Node 18/20 matrix)
+│   ├── workflows/llm-tests.yml    # CI pipeline (Node 20)
 │   ├── dependabot.yml             # Automated dependency updates
 │   ├── CODEOWNERS                 # Review ownership
 │   └── pull_request_template.md   # PR checklist
@@ -330,12 +332,11 @@ llm-testing-toolkit/
 │   │   └── logger.ts              # Colored structured logging
 │   ├── cli.ts                     # Command-line interface
 │   └── index.ts                   # Public API exports
-├── tests/unit/                    # 53 unit tests
-├── examples/                      # Example test suite configs
+├── tests/unit/                    # 67 unit tests in 7 files
+├── examples/                      # Example suites (TypeScript) and a CLI-ready llm-tests.config.json
 ├── CONTRIBUTING.md
 ├── SECURITY.md
-├── Dockerfile
-└── docker-compose.yml
+└── Dockerfile                     # Builds the CLI; mount a config to run it
 ```
 
 ---
