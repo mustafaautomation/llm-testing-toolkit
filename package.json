@@ -52,7 +52,7 @@
     "url": "https://github.com/mustafaautomation/llm-testing-toolkit/issues"
   },
   "dependencies": {
-    "commander": "^12.1.0",
+    "commander": "^15.0.0",
     "dotenv": "^18.0.9"
   },
   "devDependencies": {
