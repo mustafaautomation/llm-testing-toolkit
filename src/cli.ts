@@ -11,7 +11,7 @@ import { JsonReporter } from './reporters/json.reporter';
 import { HtmlReporter } from './reporters/html.reporter';
 import { logger, setLogLevel } from './utils/logger';
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const program = new Command();
 
